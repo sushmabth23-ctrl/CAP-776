@@ -51,10 +51,15 @@ def read_data(filename):
     sheet = workbook["Daily Log"]
 
     data = []
+    start_date = date(2026, 8, 17)
+    end_date = date(2026, 9, 21)
 
     for row in sheet.iter_rows(min_row=6, values_only=True):
         if row[0] is not None:
-            data.append(row)
+            row_date = row[0].date() if hasattr(row[0], "date") else row[0]
+
+            if start_date <= row_date <= end_date:
+             data.append(row)
 
     workbook.close()
 
@@ -128,20 +133,22 @@ def check_continue_date(data):
     
     missing_days = []
 
-    current_date = start_date
-
+    
     #start
 
     recorded_dates = [
         row[0].date() if hasattr(row[0], 'date') else row[0] 
         for row in data
-    ]
+        if start_date <= (row[0].date() if hasattr(row[0], 'date') else row[0]) <= end_date
+     ]
+    current_date = start_date
 
     while current_date <= end_date:
         expected_days += 1
         if current_date not in recorded_dates:
             missing_days.append(current_date)
         current_date = current_date + timedelta(days=1)
+    return expected_days,missing_days    
 
     # End
 
